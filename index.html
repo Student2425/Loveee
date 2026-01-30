@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Incredible Darling</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Shadows+Into+Light&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: #fff0f3;
+            background-image: radial-gradient(#ffccd5 1.5px, transparent 1.5px);
+            background-size: 30px 30px;
+            height: 100vh; display: flex; justify-content: center; align-items: center;
+            overflow: hidden; font-family: 'Gaegu', cursive;
+        }
+
+        .journal {
+            position: relative;
+            width: 90%; max-width: 400px; height: 600px;
+        }
+
+        /* Each page has its own Z-index to stack perfectly */
+        .page {
+            position: absolute; width: 100%; height: 100%;
+            background: #ffffff; border-radius: 25px;
+            box-shadow: 0 10px 40px rgba(255, 154, 162, 0.2);
+            border: 2px solid #ffeef2;
+            display: flex; flex-direction: column;
+            transition: 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        /* Decorations: Pinned to absolute corners */
+        .decor { position: absolute; font-size: 35px; z-index: 10; pointer-events: none; }
+        .tr { top: 15px; right: 15px; }
+        .bl { bottom: 15px; left: 15px; }
+        .tl { top: 15px; left: 15px; }
+        .br { bottom: 15px; right: 15px; }
+
+        .tape {
+            position: absolute; top: -5px; left: 50%; transform: translateX(-50%) rotate(-1deg);
+            width: 100px; height: 35px; background: rgba(255, 182, 193, 0.4);
+            z-index: 15; border-left: 2px dashed #fff; border-right: 2px dashed #fff;
+        }
+
+        /* Safe Content Zone: No stickers allowed here */
+        .content {
+            flex: 1;
+            padding: 70px 35px; /* Huge padding keeps text away from decor */
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+            gap: 15px;
+        }
+
+        h1 { font-family: 'Dancing Script', cursive; color: #ff4d6d; font-size: 2.2rem; margin-bottom: 5px; }
+        .shayari { font-size: 1.25rem; color: #594146; line-height: 1.4; font-weight: bold; }
+
+        .btn {
+            background: #ff758f; color: white; border: none;
+            padding: 12px 30px; border-radius: 50px; cursor: pointer;
+            font-family: 'Shadows Into Light', cursive; font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(255, 117, 143, 0.3);
+            transition: 0.3s; margin-top: 15px;
+        }
+        .btn:hover { transform: scale(1.05); background: #ff4d6d; }
+
+        .opt {
+            width: 100%; background: #fff5f7; border: 1.2px dashed #ffccd5;
+            padding: 10px; border-radius: 12px; cursor: pointer; font-size: 1.1rem;
+        }
+
+        /* Flip Animation */
+        .flipped { transform: translateY(-130%) rotate(-15deg); opacity: 0; pointer-events: none; }
+
+        #game-box {
+            width: 100%; height: 110px; background: #fffafb; border: 1.5px dashed #ffccd5;
+            border-radius: 15px; position: relative; margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="journal">
+        <div class="page" id="p12" style="z-index: 1;">
+            <div class="tape"></div>
+            <div class="decor tr">💋</div>
+            <div class="content">
+                <h1>Blush Again!</h1>
+                <p class="shayari">"Ab bas bhi karo, itna pyaara kaun dikhta hai?<br>Toh chalo, ek baar phir se shuru karein?"</p>
+                <button class="btn" onclick="location.reload()">Blush Again ❤️</button>
+            </div>
+        </div>
+
+        <div class="page" id="p11" style="z-index: 2;">
+            <div class="decor tl">🍭</div>
+            <div class="content">
+                <h1>One Secret...</h1>
+                <p class="shayari">"Pata hai... jab tum hasti ho na,<br>Toh mere din ki saari thakaan khatam ho jati hai."</p>
+                <button class="btn" onclick="celebrate(); flip('p11')">Sachhi? ➡</button>
+            </div>
+        </div>
+
+        <div class="page" id="p10" style="z-index: 3;">
+            <div class="decor br">🌸</div>
+            <div class="content">
+                <h1>Compliment!</h1>
+                <p id="ctext" class="shayari">"Click to see what I think..."</p>
+                <button class="btn" onclick="genC()">Generate Magic ✨</button>
+                <button class="btn" id="b10" style="display:none;" onclick="flip('p10')">Next ➡</button>
+            </div>
+        </div>
+
+        <div class="page" id="p9" style="z-index: 4;">
+            <div class="decor tr">🦋</div>
+            <div class="content">
+                <h1>Spin the Bottle</h1>
+                <img id="bottle" src="https://cdn-icons-png.flaticon.com/512/3220/3220455.png" style="width:50px; transition:3s;">
+                <p id="dtext" style="color:#ff4d6d; font-weight:bold; font-size:1rem;"></p>
+                <button class="btn" onclick="spin()">Spin Now!</button>
+                <button class="btn" id="b9" style="display:none;" onclick="flip('p9')">Done! ➡</button>
+            </div>
+        </div>
+
+        <div class="page" id="p8" style="z-index: 5;">
+            <div class="tape"></div>
+            <div class="content">
+                <h1>Truth or Dare?</h1>
+                <div class="opt" onclick="alert('Truth: Who is your favorite person? (Me, obviously! 😉)')">Truth 😇</div>
+                <div class="opt" onclick="alert('Dare: Send me a cute voice note right now! 🔥')">Dare 🔥</div>
+                <button class="btn" onclick="flip('p8')">Next Surprise ➡</button>
+            </div>
+        </div>
+
+        <div class="page" id="p7" style="z-index: 6;">
+            <div class="decor bl">🧸</div>
+            <div class="content">
+                <h1>Quick Quiz!</h1>
+                <p>Main zyada flirty hoon ya tum zyada cute?</p>
+                <div class="opt" onclick="celebrate(); flip('p7')">A) Main hi cute hoon 😌</div>
+                <div class="opt" onclick="celebrate(); flip('p7')">B) Dono perfect hain! 🥂</div>
+            </div>
+        </div>
+
+        <div class="page" id="p6" style="z-index: 7;">
+            <div class="decor tl">🎀</div>
+            <div class="content">
+                <h1>Catch the Kiss!</h1>
+                <p>Catch it 3 times! 😘</p>
+                <div id="game-box">
+                    <div id="kiss" style="position:absolute; cursor:pointer; font-size:28px;" onclick="catchK()">😘</div>
+                </div>
+                <button class="btn" id="b6" style="display:none;" onclick="celebrate(); flip('p6')">Got it! ➡</button>
+            </div>
+        </div>
+
+        <div class="page" id="p5" style="z-index: 8;">
+            <div class="tape"></div>
+            <div class="content">
+                <h1>Apsara! ✨</h1>
+                <p class="shayari">"Khuda ne jab tumhe banaya hoga,<br>Usko bhi tum par pyaar aaya hoga!"</p>
+                <button class="btn" onclick="flip('p5')">Keep Going ➡</button>
+            </div>
+        </div>
+
+        <div class="page" id="p4" style="z-index: 9;">
+            <div class="decor br">🍬</div>
+            <div class="content">
+                <h1>The Reward 😉</h1>
+                <p class="shayari">"Irada toh sirf dosti ka tha humara...<br>Par tumhare nakhre hi itne qaatil nikle!"</p>
+                <button class="btn" onclick="celebrate(); flip('p4')">Secret? ➡</button>
+            </div>
+        </div>
+
+        <div class="page" id="p3" style="z-index: 10;">
+            <div class="decor tr">🦋</div>
+            <div class="content">
+                <h1>Oye Sunno...</h1>
+                <p class="shayari">"Tumhe dekhkar lagta hai jaise Khuda ne,<br>Sirf mere liye ek 'Cutiepie' banayi hai."</p>
+                <button class="btn" onclick="flip('p3')">Play Game 🎮</button>
+            </div>
+        </div>
+
+        <div class="page" id="p2" style="z-index: 11;">
+            <div class="tape"></div>
+            <div class="content">
+                <h1>Love Meter</h1>
+                <div id="meterVal" style="font-size: 35px; color: #ff4d6d;">0%</div>
+                <button class="btn" onclick="startM()">Calculate Vibe</button>
+                <button class="btn" id="b2" style="display:none;" onclick="flip('p2')">Check Result ➡</button>
+            </div>
+        </div>
+
+        <div class="page" id="p1" style="z-index: 12;">
+            <div class="decor tl">🎀</div>
+            <div class="decor br">🌸</div>
+            <div class="content">
+                <h1>Hii Darling ❤️</h1>
+                <p class="shayari">"Pata hai... tumhari aankhon mein dekhne ke baad,<br>Main apna address bhi bhool jata hoon."</p>
+                <button class="btn" onclick="celebrate(); flip('p1')">Open Diary 📖</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function flip(id) { document.getElementById(id).classList.add('flipped'); }
+        function celebrate() { confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } }); }
+
+        // Love Meter
+        function startM() {
+            let c = 0;
+            let iv = setInterval(() => {
+                c += 2; document.getElementById('meterVal').innerText = c + "%";
+                if(c >= 100) {
+                    clearInterval(iv); document.getElementById('meterVal').innerText = "Infinite! ❤️";
+                    document.getElementById('b2').style.display = 'block'; celebrate();
+                }
+            }, 30);
+        }
+
+        // Kiss Catch
+        let s = 0; const k = document.getElementById('kiss');
+        setInterval(() => {
+            const x = Math.random() * (k.parentElement.clientWidth - 30);
+            const y = Math.random() * (k.parentElement.clientHeight - 30);
+            k.style.left = x + 'px'; k.style.top = y + 'px';
+        }, 800);
+        function catchK() { s++; if(s >= 3) { k.style.display = 'none'; document.getElementById('b6').style.display = 'block'; celebrate(); } }
+
+        // Bottle Spin
+        function spin() {
+            const b = document.getElementById('bottle');
+            const deg = Math.floor(Math.random() * 360) + 1440;
+            b.style.transform = `rotate(${deg}deg)`;
+            setTimeout(() => {
+                document.getElementById('dtext').innerText = "Dare: Send me your cutest selfie! 📸";
+                document.getElementById('b9').style.display = 'block'; celebrate();
+            }, 3100);
+        }
+
+        // Compliment
+        function genC() {
+            const cs = ["You are 100% Incredible!", "Your smile is illegal! 😍", "Cutest human alive!", "I'm so lucky!"];
+            document.getElementById('ctext').innerText = cs[Math.floor(Math.random()*cs.length)];
+            document.getElementById('b10').style.display = 'block'; celebrate();
+        }
+    </script>
+</body>
+</html>
